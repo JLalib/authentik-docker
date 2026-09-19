@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  authentik_postgres:
+    image: postgres:16-alpine
+    container_name: authentik-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=authentik
+      - POSTGRES_USER=authentik
+      - POSTGRES_PASSWORD=changeme123
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U authentik"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - authentik_postgres:/var/lib/postgresql/data
+
+  authentik_redis:
+    image: redis:8-alpine
+    container_name: authentik-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - authentik_redis:/data
+
+  authentik_server:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik-server
+    restart: unless-stopped
+    environment:
+      - AUTHENTIK_POSTGRESQL__HOST=authentik_postgres
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__USER=authentik
+      - AUTHENTIK_POSTGRESQL__PASSWORD=changeme123
+      - AUTHENTIK_REDIS__HOST=authentik_redis
+      - AUTHENTIK_SECRET_KEY=$(openssl rand -hex 32)
+    ports:
+      - "9000:9000"
+    depends_on:
+      authentik_postgres:
+        condition: service_healthy
+      authentik_redis:
+        condition: service_healthy
+    command: server
+
+  authentik_worker:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik-worker
+    restart: unless-stopped
+    environment:
+      - AUTHENTIK_POSTGRESQL__HOST=authentik_postgres
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__USER=authentik
+      - AUTHENTIK_POSTGRESQL__PASSWORD=changeme123
+      - AUTHENTIK_REDIS__HOST=authentik_redis
+      - AUTHENTIK_SECRET_KEY=$(openssl rand -hex 32)
+    depends_on:
+      authentik_postgres:
+        condition: service_healthy
+      authentik_redis:
+        condition: service_healthy
+    command: worker
+
+volumes:
+  authentik_postgres:
+  authentik_redis:
