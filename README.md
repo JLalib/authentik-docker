@@ -7,44 +7,39 @@
 
 ## 📋 Descripción general
 
-**Authentik** es un **Identity Provider (IdP) open source moderno** que proporciona **SSO (Single Sign-On) profesional autohospedado** compatible con **SAML, OAuth2/OIDC, LDAP, RADIUS**. Arquitectura **multi-tenant**, **flows visuales** para lógica de autenticación, **access policies**, **blueprints** (automatización), **reverse proxy integrado** (outpost), **auditing completo**, escalable en **Docker/Kubernetes**, todo bajo tu control sin **vendor lock-in**.
+**Authentik** es un Identity Provider (IdP) open source moderno que proporciona SSO (Single Sign-On) profesional autohospedado compatible con **SAML 2.0, OAuth2/OIDC, LDAP, RADIUS**. Arquitectura multi-tenant, flows visuales para lógica de autenticación, access policies, blueprints (automatizaciones), reverse proxy integrado (outpost), auditing completo, escalable en Docker/Kubernetes. Todo bajo tu control sin vendor lock-in.
 
-El reemplazo **Okta/Auth0/Entra ID/Ping Identity** que pedías para autohospedado. **24.7k estrellas en GitHub**, **MIT open source**, **production-ready**.
+El reemplazo a **Okta, Auth0, Entra ID, Ping Identity** que pedías para autohospedado. 24.7k ⭐ en GitHub, 23.6k+ commits, desarrollo activo, licencia MIT (core).
 
 ## ✨ Características principales
 
-- 🔐 **Multi-protocolo SSO**: SAML 2.0, OAuth2, OIDC, LDAP, RADIUS - un IdP para todo
-- 🌐 **Reverse proxy integrado**: Outpost proxy protege cualquier app legacy sin cambios de código
-- 🏢 **Multi-tenant**: Múltiples organizations en una instalación, branding customizable
-- 🎨 **Visual flow editor**: Drag-drop auth logic (conditional, MFA, risk-based) sin código
-- 🛡️ **Access policies**: Conditional auth, geo-blocking, device trust, MFA enforcement
-- ⚙️ **Blueprints**: Automation, bulk config, IaC - deployment YAML-based
-- 📂 **Directory sync**: LDAP, Active Directory, Google Workspace sync (users + groups)
-- 🔑 **Social login**: GitHub, Google, Apple, Discord, proveedores OIDC custom
-- 🔐 **MFA + WebAuthn**: TOTP, backup codes, WebAuthn (FIDO2) - seguridad moderna
-- 📊 **Audit logging**: Todos los events tracked (user actions, auth, policy changes)
-- 📱 **App library**: 500+ pre-configured app integrations - instant SSO setup
-- ☸️ **Kubernetes-native**: Helm chart oficial, scalable, cloud-ready, production
+- 🔐 **Multi-protocolo SSO**: SAML 2.0, OAuth2, OIDC, LDAP, RADIUS en un solo IdP
+- 🛡️ **Reverse proxy integrado**: Outpost proxy protege cualquier app legacy sin cambios de código
+- 🏢 **Multi-tenant**: Múltiples organizations en una instalación, branding personalizable
+- 🎨 **Visual flow editor**: Drag-drop para lógica de autenticación (condicional, MFA, risk-based) sin código
+- 📋 **Access policies**: Auth condicional, geo-blocking, device trust, MFA enforcement
+- ⚙️ **Blueprints**: Automatización, bulk config, IaC basado en YAML
+- 🔄 **Directory sync**: LDAP, Active Directory, Google Workspace sync (usuarios + grupos)
+- 🌐 **Social login**: GitHub, Google, Apple, Discord, proveedores OIDC custom
+- 🔑 **MFA + WebAuthn**: TOTP, backup codes, WebAuthn (FIDO2) - seguridad moderna
+- 📊 **Audit logging**: Todos los eventos trackeados (acciones usuario, auth, cambios policy)
+- 📱 **App library**: 500+ integraciones pre-configuradas para SSO instantáneo
+- ☸️ **Kubernetes-native**: Helm chart oficial, escalable, cloud-ready, production-grade
 
 ## 📋 Requisitos del sistema
 
 - **Docker & Docker Compose v2+**
-- **RAM**: 2 GB - 4 GB mínimo (Python + Go app) — **4 GB recomendado**
-- **Disco**: 10 GB - 50+ GB espacio (según users, audit logs)
-- **Puertos TCP**: 
-  - `9000` (web UI)
-  - `9300` (LDAP outpost)
-  - `9400` (RADIUS outpost)
+- **RAM**: 2 GB mínimo (4 GB recomendado) - Python backend + Go outpost
+- **Disco**: 10 GB - 50+ GB (según usuarios, audit logs)
+- **Puertos TCP**: 9000 (web UI), 9300 (LDAP outpost), 9400 (RADIUS outpost)
 - **PostgreSQL 14+** (bundled o externo)
-- **Redis** (sessions, caching, optional pero recomendado)
+- **Redis** (sesiones, caching - opcional pero recomendado)
 - **Python 3.11+** (bundled en imagen)
 - **Go 1.20+** (outpost proxy, bundled)
-- **Opcional**: LDAP/AD servidor para directory sync
-- **Opcional**: External PostgreSQL (para HA production)
+- **Opcional**: Servidor LDAP/AD para directory sync
+- **Opcional**: PostgreSQL externo (para HA production)
 
-> ⚠️ **Compute requirements**: Authentik requiere bastante recursos (Python backend + Go outpost). 2GB RAM mínimo pero 4GB recomendado. Audit logging puede llenar disco rápido, plan retención.
->
-> 🏭 **HA/Production**: Para producción usar external PostgreSQL (replicación), Redis externo, múltiples replicas. Kubernetes + Helm recomendado para escala.
+> ⚠️ **Nota**: Authentik requiere recursos considerables. Audit logging puede llenar disco rápido - planifica retención. Para producción: PostgreSQL externo (replicación), Redis externo, múltiples réplicas. Kubernetes + Helm recomendado para escala.
 
 ## 🐳 Instalación
 
@@ -131,7 +126,7 @@ volumes:
 # Generar secret aleatorio
 openssl rand -hex 32
 
-# Copiar y reemplazar AUTHENTIK_SECRET_KEY en compose
+# Copiar y reemplazar AUTHENTIK_SECRET_KEY en compose (ambos servicios)
 ```
 
 ### Paso 3: Iniciar Authentik
@@ -142,7 +137,6 @@ docker compose up -d
 
 # Espera ~20 segundos para migrations
 docker compose logs -f authentik_server
-
 # Debería ver "Starting application server" cuando listo
 ```
 
@@ -153,34 +147,27 @@ docker compose logs -f authentik_server
 | 🔐 **Authentik Admin UI** | `http://localhost:9000` |
 | 🆔 **Authentik Login** | `http://localhost:9000/auth/login/` |
 
-### Setup inicial (primer acceso)
-
-1. Abre `http://localhost:9000`
-2. Setup wizard automático → crea admin user
-3. Ingresa email + password admin
-4. Dashboard admin aparece
-5. Configura LDAP sync (opcional), social logins, apps
-6. ¡Listo SSO! 🎉
-
-> 💡 **Desde otros dispositivos**: Usa la IP de tu servidor: `http://192.168.1.100:9000`
-> Para obtener tu IP: `hostname -I`
+> 💡 **Desde otros dispositivos**: Usa la IP de tu servidor: `http://192.168.1.100:9000`  
+> Obtén tu IP: `hostname -I`
 
 ## ⚙️ Configuración
 
-1. **Variables de entorno críticas**: `AUTHENTIK_SECRET_KEY` (generar con `openssl rand -hex 32`), `AUTHENTIK_POSTGRESQL__PASSWORD`, `AUTHENTIK_REDIS__HOST`
-2. **PostgreSQL**: Usar external DB en producción (replicación, backups gestionados)
-3. **Redis**: Recomendado para sessions/cache; external en HA
-4. **Outposts**: Configurar Proxy Outpost para proteger apps legacy (puerto 9000/9443)
-5. **Email/SMTP**: Configurar en Admin → System → Email para password reset, notificaciones
-6. **Certificados TLS**: Usar reverse proxy (Traefik, Nginx Proxy Manager) con Let's Encrypt para HTTPS
-7. **Backup strategy**: pg_dump programado + volume snapshots
-8. **Log retention**: Configurar rotation para evitar llenar disco (audit logs crecen rápido)
+1. **Setup wizard automático** al acceder por primera vez a `http://localhost:9000` → crea usuario admin
+2. **Ingresa email + password** admin → Dashboard admin aparece
+3. **Configura LDAP sync** (opcional) en Admin → Directory Sync
+4. **Configura social logins** (opcional) en Admin → Sources
+5. **Agrega aplicaciones** en Admin → Applications → Create application
+6. **Configura outpost proxy** en Admin → Infrastructure → Outposts para proteger apps legacy
+7. **Define flows personalizados** en Admin → Flows & Stages para lógica de auth custom
+8. **Configura access policies** en Admin → Policies para auth condicional, MFA, geo-blocking
+9. **Habilita blueprints** en Admin → Blueprints para automatización/IaC
+10. **Revisa audit logs** en Admin → Events para monitoreo completo
 
 ## 🚀 Primeros pasos
 
 1. **Admin login**
    - Abre `http://localhost:9000`
-   - Click "Administration" → login con admin credentials
+   - Click "Administration" → login con credenciales admin
    - Dashboard admin abre
 
 2. **Crear usuarios**
@@ -203,19 +190,19 @@ docker compose logs -f authentik_server
    - Outpost auto-configura reverse proxy
    - Acceso app protegido via Authentik
 
-5. **Setup LDAP directory sync (opcional)**
+5. **Setup LDAP directory sync** (opcional)
    - Admin → Directory Sync → LDAP
    - Configure LDAP server connection
    - Map usuario + groups
    - Enable sync → auto-sync usuarios
 
-6. **Setup social login (opcional)**
+6. **Setup social login** (opcional)
    - Admin → Sources → Create
    - Type: GitHub, Google, etc
    - Configure OAuth app credentials
    - Users pueden loguear via social
 
-7. **Crear flow personalizado (avanzado)**
+7. **Crear flow personalizado** (avanzado)
    - Admin → Flows & Stages → Create Flow
    - Drag-drop stages (login form, MFA, policy check)
    - Lógica autenticación customizable
@@ -224,24 +211,23 @@ docker compose logs -f authentik_server
 ## 💡 Casos de uso
 
 - 🏢 **Reemplazo Okta/Auth0**: SSO enterprise self-hosted, multi-protocolo, no vendor lock-in
-- 🛡️ **Proteger apps legacy**: Reverse proxy outpost, agrega SSO sin cambios código
-- 🏠 **Homelabs multi-usuario**: Gestión usuarios + SSO, apps protegidas
+- 🛡️ **Proteger apps legacy**: Reverse proxy outpost agrega SSO sin cambios de código
+- 🏠 **Homelabs multi-usuario**: Gestión usuarios + SSO, apps protegidas centralizadas
 - 🔄 **LDAP/AD integration**: Sync usuarios Active Directory, access control integrado
-- ☁️ **Multi-tenant SaaS**: Blueprints, organizations separadas, branding custom
-- 🔐 **Zero-trust security**: Access policies condicionales, risk-based auth, MFA
+- 🏗️ **Multi-tenant SaaS**: Blueprints, organizations separadas, branding custom
+- 🔐 **Zero-trust security**: Access policies condicionales, risk-based auth, MFA enforcement
 
 ## 🔒 Acceso remoto seguro
 
 Para exponer Authentik de forma segura a Internet:
 
-1. **Reverse proxy** (Traefik/Nginx Proxy Manager/Caddy) con **TLS automático** (Let's Encrypt)
-2. **Authelia/Cloudflare Tunnel** como capa adicional
-3. **Restringir Admin UI** a VPN (WireGuard/Tailscale) o IP allowlist
-4. **Configurar `AUTHENTIK_HOST`** y `AUTHENTIK_PROTOCOL=https` en environment
-5. **HSTS, CSP headers** via reverse proxy
-6. **Rate limiting** en proxy (Authentik tiene rate limiting interno también)
+1. **Reverse proxy** (Traefik, Nginx Proxy Manager, Caddy) con TLS automático (Let's Encrypt)
+2. **Authelia/Cloudflare Tunnel** para capa adicional de autenticación
+3. **VPN** (WireGuard, Tailscale) para acceso solo red privada
+4. **Configurar `AUTHENTIK_HOST`** en variables de entorno para URLs públicas correctas
+5. **Habilitar `SECURE_SSL_REDIRECT=True`** y headers de seguridad en producción
 
-> ⚠️ **NUNCA** expongas puerto 9000 directamente a Internet sin TLS y autenticación adicional.
+> ⚠️ **Nunca expongas puerto 9000 directamente a Internet** sin TLS y autenticación adicional.
 
 ## 🛠️ Gestión y mantenimiento
 
@@ -277,10 +263,12 @@ docker stats authentik_server authentik_worker authentik_postgres authentik_redi
 
 ## 📝 Licencia
 
-**MIT License** (core) + **Enterprise edition** disponible con features avanzadas y soporte comercial.
+**MIT License** (core) - [Ver licencia](https://github.com/goauthentik/authentik/blob/main/LICENSE)
 
-Copyright (c) 2024+ goauthentik/authentik contributors
+Enterprise edition disponible con features avanzadas y soporte comercial.
 
 ---
 
-> 📖 **Guía completa**: [Cómo instalar Authentik en Docker - SSO/IdP moderna autohospedada](https://genbyte.blogspot.com/2026/09/como-instalar-authentik-en-docker.html)
+> 📖 **Guía completa**: [Cómo instalar Authentik en Docker - SSO/IdP moderna autohospedada](https://genbyte.blogspot.com/2026/09/como-instalar-authentik-en-docker.html)  
+> 🐙 **Repo oficial**: [goauthentik/authentik](https://github.com/goauthentik/authentik)  
+> 📚 **Docs oficiales**: [goauthentik.io/docs](https://goauthentik.io/docs)
